@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.homepage      = "https://github.com/jorgeyau/efacturapty-ruby"
   spec.license       = "MIT"
 
-  spec.required_ruby_version = ">= 3.1"
+  spec.required_ruby_version = ">= 2.6"
 
   spec.metadata["homepage_uri"]    = spec.homepage
   spec.metadata["source_code_uri"] = spec.homepage
@@ -25,4 +25,7 @@ Gem::Specification.new do |spec|
   ]
 
   spec.require_paths = ["lib"]
+
+  spec.add_dependency "faraday", ">= 1.0", "< 3"
+  spec.add_dependency "faraday-retry", ">= 1.0", "< 3"
 end

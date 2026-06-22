@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+
+require "bundler/setup"
+require "efacturapty"
+require "irb"
+
+# Quick start:
+#   EFACTURAPTY_CLIENT_ID=xxx EFACTURAPTY_CLIENT_SECRET=yyy bin/console
+#
+# Then:
+#   Efacturapty.configure { |c| c.client_id = ENV["EFACTURAPTY_CLIENT_ID"]; c.client_secret = ENV["EFACTURAPTY_CLIENT_SECRET"] }
+#   client = Efacturapty.client
+#   client.catalogs.countries
+
+IRB.start(__FILE__)
