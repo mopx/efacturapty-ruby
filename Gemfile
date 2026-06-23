@@ -7,8 +7,10 @@ group :development, :test do
   gem "webmock", "~> 3"
 end
 
-# rubocop requires Ruby >= 2.7 — only install for linting, not on the 2.6 test run
-group :lint do
-  gem "rubocop", "~> 1.70", require: false
-  gem "rubocop-rspec", "~> 3.4", require: false
+# rubocop-rspec >= 2.21 requires Ruby >= 2.7; skip the whole group on 2.6
+if RUBY_VERSION >= "2.7"
+  group :lint do
+    gem "rubocop", "~> 1.70", require: false
+    gem "rubocop-rspec", "~> 3.4", require: false
+  end
 end

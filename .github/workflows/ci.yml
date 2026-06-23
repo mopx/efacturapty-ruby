@@ -23,9 +23,7 @@ jobs:
           bundler-cache: false
 
       - name: Install dependencies
-        run: |
-          bundle config set --local without lint
-          bundle install
+        run: bundle install
 
       - name: Run tests
         run: bundle exec rspec
