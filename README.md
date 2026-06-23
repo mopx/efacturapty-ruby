@@ -339,7 +339,7 @@ for sandbox credentials.
 ## Development
 
 ```sh
-git clone https://github.com/jorgeyau/efacturapty-ruby
+git clone https://github.com/mopx/efacturapty-ruby
 cd efacturapty-ruby
 bundle install
 
@@ -361,7 +361,7 @@ modern Ruby. Use a version manager (rbenv / rvm) to test on Ruby 2.6.10 with
 ## Contributing
 
 Bug reports and pull requests welcome at
-https://github.com/jorgeyau/efacturapty-ruby.
+https://github.com/mopx/efacturapty-ruby.
 
 ## License
 

@@ -1,5 +1,5 @@
 # Ruby client for Panama's DGI e-invoicing (e-factura / SFEP) system.
-# @see https://github.com/jorgeyau/efacturapty-ruby
+# @see https://github.com/mopx/efacturapty-ruby
 module Efacturapty
   # DGI reference code tables from Ficha Técnica de Factura Electrónica v1.10.
   # Use these constants instead of magic strings in your integration code.

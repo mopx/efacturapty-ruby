@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
 
   spec.summary       = "Ruby client for Panama's DGI e-invoicing (e-factura) API"
   spec.description   = "Interact with Panama's Dirección General de Ingresos (DGI) electronic invoicing system from Ruby."
-  spec.homepage      = "https://github.com/jorgeyau/efacturapty-ruby"
+  spec.homepage      = "https://github.com/mopx/efacturapty-ruby"
   spec.license       = "MIT"
 
   spec.required_ruby_version = ">= 2.6"
