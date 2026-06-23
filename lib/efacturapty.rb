@@ -1,6 +1,7 @@
 require_relative "efacturapty/version"
 require_relative "efacturapty/errors"
 require_relative "efacturapty/configuration"
+require_relative "efacturapty/constants"
 require_relative "efacturapty/client"
 
 # Ruby client for Panama's DGI e-invoicing (e-factura / SFEP) system.

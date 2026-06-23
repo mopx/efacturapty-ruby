@@ -103,3 +103,94 @@ client.invoices.list(
 ```
 
 Returns a paginated response. The response body matches `IPaginated<InvoiceDocumentResponse>`.
+
+## Credit notes and debit notes
+
+Panama's DGI defines several credit/debit note document types. The gem provides a helper for
+each so you do not have to set `tipoDocumento` and build the reference structure manually.
+
+### Document type codes
+
+| Code | Method | Description |
+|------|--------|-------------|
+| `"04"` | `create_credit_note` | Nota de Crédito referente a una o varias FE |
+| `"05"` | `create_debit_note` | Nota de Débito referente a una o varias FE |
+| `"06"` | `create_generic_credit_note` | Nota de Crédito genérica |
+| `"07"` | `create_generic_debit_note` | Nota de Débito genérica |
+
+All helpers accept the same keyword options as `create` (`include_qr:`, `include_xml:`, `locale:`).
+
+### Tipos 04 / 05 — referenced notes
+
+These must point back to the CUFE of the original invoice (`documentosFiscalesReferenciados`,
+DGI Ficha Técnica v1.10 field B606).
+
+```ruby
+client.invoices.create_credit_note(
+  base_payload,
+  referenced_cufe: "CUFE-OF-ORIGINAL-INVOICE",
+  referenced_date: "2026-06-01",   # YYYY-MM-DD issue date of original FE
+  include_qr: true
+)
+
+client.invoices.create_debit_note(
+  base_payload,
+  referenced_cufe: "CUFE-OF-ORIGINAL-INVOICE",
+  referenced_date: "2026-06-01"
+)
+```
+
+The gem builds the nested `documentosFiscalesReferenciados` structure automatically:
+
+```json
+{
+  "datosGenerales": {
+    "tipoDocumento": "04",
+    "documentosFiscalesReferenciados": [
+      {
+        "fechaEmisionDocumentoReferenciado": "2026-06-01",
+        "informacionReferencia": {
+          "informacionReferencia": {
+            "cufeReferenciado": "CUFE-OF-ORIGINAL-INVOICE"
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
+Any other keys already present in `datosGenerales` (emitter, receptor, dates, etc.) are preserved.
+`tipoDocumento` in the base payload is overridden by the helper.
+
+### Tipos 06 / 07 — generic notes
+
+Generic credit/debit notes do not reference a specific original FE, so no CUFE is needed.
+
+```ruby
+client.invoices.create_generic_credit_note(base_payload)
+client.invoices.create_generic_debit_note(base_payload, include_xml: true)
+```
+
+The helpers set `tipoDocumento` to `"06"` and `"07"` respectively, leaving the rest of the
+payload untouched.
+
+## Cancellations
+
+See the [Invoice Events documentation](invoice_events.md) for `client.invoice_events.cancel`.
+
+## Other methods
+
+| Method | Endpoint |
+|--------|----------|
+| `create_from_xml(xml_string)` | `POST /api/v1/Invoices/CreateInvoiceFromXml` |
+| `authorization(cufe)` | `GET /api/v1/Invoices/Authorization/{cufe}` |
+| `authorization_admin(cufe)` | `GET /api/v1/Invoices/AuthorizationAdmin/{cufe}` |
+| `qr_image(cufe)` | `GET /api/v1/Invoices/GetQrImage/{cufe}` |
+| `xml_from_dgi(cufe)` | `GET /api/v1/Invoices/GetXmlFromDGI/{cufe}` |
+| `taxpayer_response(invoice_id)` | `GET /api/v1/Invoices/GetTaxpayerInvoiceResponse/{id}` |
+| `find(cufe_id)` | `GET /api/v1/Invoices/id/{cufeId}` |
+| `cafe_file(cufe_id)` | `GET /api/v1/Invoices/{cufeId}/cafe-file` — returns raw PDF bytes |
+| `xml_file(cufe_id)` | `GET /api/v1/Invoices/{cufeId}/xml-file` — returns raw XML bytes |
+| `html_cafe(cufe_id)` | `GET /api/v1/Invoices/{cufeId}/html-cafe` |
+| `mail_to(invoice_id, email:)` | `POST /api/v1/Invoices/{invoiceId}/mailto` |

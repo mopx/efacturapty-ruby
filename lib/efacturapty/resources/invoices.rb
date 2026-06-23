@@ -4,6 +4,7 @@ module Efacturapty
     #
     # Payloads are passed as plain Ruby hashes and mapped directly to the DGI
     # InvoiceRequest JSON structure. See the API docs for the full schema.
+    # rubocop:disable Metrics/ClassLength
     class Invoices < BaseResource
       BASE_PATH = "/api/v1/Invoices".freeze
 
@@ -132,6 +133,58 @@ module Efacturapty
         post("#{BASE_PATH}/#{invoice_id}/mailto", body)
       end
 
+      # ---------------------------------------------------------------------------
+      # Document-type helpers
+      # These build the required DGI fields for each document type and delegate
+      # to {#create}. All keyword options accepted by {#create} are forwarded.
+      # ---------------------------------------------------------------------------
+
+      # Nota de Crédito referente a una o varias FE (tipoDocumento "04").
+      # The DGI requires a reference to the original invoice's CUFE (field B606).
+      #
+      # @param payload [Hash] base InvoiceRequest payload (same structure as {#create}).
+      # @param referenced_cufe [String] CUFE of the invoice being corrected.
+      # @param referenced_date [String] issue date of that invoice (YYYY-MM-DD).
+      # @return [Response]
+      def create_credit_note(payload, referenced_cufe:, referenced_date:, **opts)
+        create(
+          with_document_type(payload, "04", referenced_cufe, referenced_date),
+          **opts
+        )
+      end
+
+      # Nota de Débito referente a una o varias FE (tipoDocumento "05").
+      # Same structure as {#create_credit_note} but for debit notes.
+      #
+      # @param payload [Hash] base InvoiceRequest payload.
+      # @param referenced_cufe [String] CUFE of the invoice being corrected.
+      # @param referenced_date [String] issue date of that invoice (YYYY-MM-DD).
+      # @return [Response]
+      def create_debit_note(payload, referenced_cufe:, referenced_date:, **opts)
+        create(
+          with_document_type(payload, "05", referenced_cufe, referenced_date),
+          **opts
+        )
+      end
+
+      # Nota de Crédito genérica (tipoDocumento "06").
+      # No reference to a specific FE is required.
+      #
+      # @param payload [Hash] base InvoiceRequest payload.
+      # @return [Response]
+      def create_generic_credit_note(payload, **opts)
+        create(with_tipo_documento(payload, "06"), **opts)
+      end
+
+      # Nota de Débito genérica (tipoDocumento "07").
+      # No reference to a specific FE is required.
+      #
+      # @param payload [Hash] base InvoiceRequest payload.
+      # @return [Response]
+      def create_generic_debit_note(payload, **opts)
+        create(with_tipo_documento(payload, "07"), **opts)
+      end
+
       # Convert snake_case filter keys to the PascalCase query params the API expects.
       PARAM_MAP = {
         "date_from" => "DateFrom",
@@ -157,6 +210,35 @@ module Efacturapty
           out[PARAM_MAP.fetch(k.to_s, k.to_s)] = v
         end
       end
+
+      # Sets tipoDocumento and injects a documentosFiscalesReferenciados array
+      # for referenced (tipos 04/05) credit/debit notes.
+      def with_document_type(payload, tipo, cufe, date)
+        with_tipo_documento(payload, tipo).tap do |p|
+          refs = [build_fe_reference(cufe: cufe, date: date)]
+          p["datosGenerales"] = (p["datosGenerales"] || {}).merge(
+            "documentosFiscalesReferenciados" => refs
+          )
+        end
+      end
+
+      # Sets only tipoDocumento (for generic tipos 06/07 that need no CUFE reference).
+      def with_tipo_documento(payload, tipo)
+        dat_gen = (payload["datosGenerales"] || {}).merge("tipoDocumento" => tipo)
+        payload.merge("datosGenerales" => dat_gen)
+      end
+
+      # Builds the DGI reference structure that points back to the original FE.
+      # Ficha Técnica v1.10 field B606: cufeReferenciado inside gDFRefFERequest.
+      def build_fe_reference(cufe:, date:)
+        {
+          "fechaEmisionDocumentoReferenciado" => date,
+          "informacionReferencia" => {
+            "informacionReferencia" => { "cufeReferenciado" => cufe }
+          }
+        }
+      end
     end
+    # rubocop:enable Metrics/ClassLength
   end
 end

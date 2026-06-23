@@ -1,5 +1,15 @@
 # efacturapty
 
+> **Disclaimer:** This gem is an independent, unofficial Ruby client library. It is **not**
+> affiliated with, endorsed by, or supported by efacturapty or the Dirección General de Ingresos
+> (DGI) of Panama. For official documentation and support, visit
+> [efacturapty.com](https://www.efacturapty.com) and the
+> [DGI e-factura portal](https://www.dgi.mef.gob.pa).
+
+> **AI-generated code notice:** This library was generated with the assistance of AI tools.
+> Review the source carefully before using it in production, and test against the sandbox
+> environment before going live.
+
 Ruby client gem for Panama's DGI **e-invoicing (e-factura / SFEP)** system, powered by the
 [efacturapty](https://www.efacturapty.com) service.
 

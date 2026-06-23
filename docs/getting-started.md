@@ -1,5 +1,11 @@
 # Getting Started
 
+> **Unofficial library:** This gem is not affiliated with or supported by efacturapty or the DGI.
+> For official API documentation visit [efacturapty.com](https://www.efacturapty.com).
+>
+> **AI-generated code:** This library was built with AI assistance. Review and test thoroughly
+> before deploying to production.
+
 ## 1. Install the gem
 
 ```ruby

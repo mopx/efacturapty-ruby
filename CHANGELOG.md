@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `Efacturapty::Constants` module with all DGI reference code tables from Ficha Técnica v1.10:
+  `DOCUMENT_TYPES`, `OPERATION_NATURES`, `OPERATION_DIRECTIONS`, `DESTINATIONS`,
+  `CAFE_FORMATS`, `CAFE_DELIVERY_METHODS`, `CONTAINER_DELIVERY`, `GENERATION_PROCESSES`,
+  `SALE_TRANSACTION_TYPES`, `RECEPTOR_TYPES`, `ITBMS_RATES`, `PAYMENT_METHODS`
+- Invoice document-type helpers on `Resources::Invoices`:
+  - `create_credit_note(payload, referenced_cufe:, referenced_date:, **opts)` — tipoDocumento "04"
+  - `create_debit_note(payload, referenced_cufe:, referenced_date:, **opts)` — tipoDocumento "05"
+  - `create_generic_credit_note(payload, **opts)` — tipoDocumento "06"
+  - `create_generic_debit_note(payload, **opts)` — tipoDocumento "07"
+- Docs: `docs/constants.md`, extended `docs/invoices.md` with credit/debit note section
+
 ### Planned
 - Typed request builders for DGI invoice DTOs (gEmis, gItem, gTot, etc.)
 - WebPos API endpoints
