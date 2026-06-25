@@ -60,8 +60,11 @@ docs/
 ## API facts (live OpenAPI spec at https://api.efacturapty.com/swagger/v1/swagger.json)
 
 - **Base URL:** `https://api.efacturapty.com`
-- **Auth:** OAuth2 `client_credentials` → `https://sec.efacturapty.com/connect/token`
-  Scope: `apiApplication`. Token is cached + auto-refreshed (60s buffer before expiry).
+- **Auth:** Two modes supported:
+  - Static API key (`config.api_key`): Bearer token sent directly, no OAuth2 call.
+  - OAuth2 `client_credentials` (`config.client_id` + `client_secret`) →
+    `https://sec.efacturapty.com/connect/token`. Scope: `apiApplication`.
+    Token is cached + auto-refreshed (60s buffer before expiry).
 - **18 endpoints** in three groups:
 
   | Group | Method | Path |

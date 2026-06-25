@@ -9,6 +9,17 @@ RSpec.describe Efacturapty::Token do
   end
 
   describe "#access_token" do
+    context "when api_key is configured" do
+      it "returns the static token without any network call" do
+        cfg = Efacturapty::Configuration.new
+        cfg.api_key = "static-key-abc"
+        t = described_class.new(cfg)
+
+        expect(t.access_token).to eq("static-key-abc")
+        expect(a_request(:post, "https://sec.efacturapty.com/connect/token")).not_to have_been_made
+      end
+    end
+
     it "returns the token from the token endpoint" do
       stub_request(:post, "https://sec.efacturapty.com/connect/token")
         .with(body: hash_including("grant_type" => "client_credentials"))

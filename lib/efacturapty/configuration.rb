@@ -13,6 +13,7 @@ module Efacturapty
 
     attr_accessor :client_id,
                   :client_secret,
+                  :api_key,
                   :scope,
                   :api_base_url,
                   :auth_base_url,
@@ -32,7 +33,9 @@ module Efacturapty
     end
 
     def validate!
-      raise ConfigurationError, "client_id is required" if blank?(client_id)
+      return unless blank?(api_key)
+
+      raise ConfigurationError, "client_id is required"     if blank?(client_id)
       raise ConfigurationError, "client_secret is required" if blank?(client_secret)
     end
 

@@ -3,9 +3,14 @@ require "uri"
 require "json"
 
 module Efacturapty
-  # Manages an OAuth2 client_credentials token from the efacturapty IdentityServer.
-  # Caches the access_token and refreshes it automatically 60 seconds before expiry.
-  # Thread-safe via a Mutex.
+  # Returns a Bearer token for API requests.
+  #
+  # Two modes:
+  #   - Static API key (config.api_key set): returns the configured value directly,
+  #     no network call needed. Use this when the API issues a long-lived API key.
+  #   - OAuth2 client_credentials (config.client_id + client_secret): exchanges
+  #     credentials for an access_token via the IdentityServer, caches it, and
+  #     refreshes automatically 60 s before expiry. Thread-safe via a Mutex.
   class Token
     GRANT_TYPE    = "client_credentials".freeze
     EXPIRY_BUFFER = 60 # seconds before actual expiry to refresh
@@ -17,8 +22,10 @@ module Efacturapty
       @expires_at = nil
     end
 
-    # Returns a valid Bearer token string, fetching a new one if needed.
+    # Returns a valid Bearer token string.
     def access_token
+      return @config.api_key if @config.api_key
+
       @mutex.synchronize do
         fetch! if expired?
         @token
