@@ -27,6 +27,7 @@ lib/
       invoice_events.rb           # cancel (CreateCancellation)
       catalogs.rb                 # countries, currencies, locations, cpbs_families, cpbs_segments
       subscriptions.rb            # list (paginated)
+      taxpayers.rb                # query_ruc (QueryRucDvPac)
   generators/
     efacturapty/
       install_generator.rb        # rails g efacturapty:install
@@ -44,6 +45,7 @@ spec/
       invoice_events_spec.rb
       catalogs_spec.rb
       subscriptions_spec.rb
+      taxpayers_spec.rb
 
 docs/
   getting-started.md
@@ -52,6 +54,7 @@ docs/
   errors.md
   catalogs.md
   subscriptions.md                # subscription fields + list usage
+  taxpayers.md                    # query_ruc usage + response fields
 ```
 
 ## API facts (live OpenAPI spec at https://api.efacturapty.com/swagger/v1/swagger.json)
@@ -83,6 +86,7 @@ docs/
   | Catalogs | GET | `/api/v1/Catalogs/CPBSfams` |
   | Catalogs | GET | `/api/v1/Catalogs/CPBSsegs` |
   | Subscriptions | GET | `/api/v1/Subscriptions` |
+  | Taxpayers | GET | `/api/v1/Taxpayers/QueryRucDvPac/{taxpayerType}/{ruc}` |
 
 ## Error hierarchy
 
