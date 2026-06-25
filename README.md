@@ -13,7 +13,7 @@
 Ruby client gem for Panama's DGI **e-invoicing (e-factura / SFEP)** system, powered by the
 [efacturapty](https://www.efacturapty.com) service.
 
-Handles OAuth2 authentication, PAC authorization, invoice creation, cancellation, file downloads,
+Handles authentication, PAC authorization, invoice creation, cancellation, file downloads,
 and all reference catalogs — compatible with **Ruby 2.6+ / Rails 5.2+** and modern stacks.
 
 ---
@@ -59,8 +59,7 @@ gem install efacturapty
 require "efacturapty"
 
 Efacturapty.configure do |c|
-  c.client_id     = ENV["EFACTURAPTY_CLIENT_ID"]
-  c.client_secret = ENV["EFACTURAPTY_CLIENT_SECRET"]
+  c.api_key = ENV["EFACTURAPTY_API_KEY"]
 end
 
 client = Efacturapty.client
@@ -90,8 +89,7 @@ This creates `config/initializers/efacturapty.rb`:
 
 ```ruby
 Efacturapty.configure do |config|
-  config.client_id     = ENV.fetch("EFACTURAPTY_CLIENT_ID", nil)
-  config.client_secret = ENV.fetch("EFACTURAPTY_CLIENT_SECRET", nil)
+  config.api_key = ENV.fetch("EFACTURAPTY_API_KEY", nil)
 
   # config.environment   = :production  # or :test
   # config.open_timeout  = 5
@@ -106,8 +104,7 @@ end
 require "efacturapty"
 
 Efacturapty.configure do |c|
-  c.client_id     = "your-client-id"
-  c.client_secret = "your-client-secret"
+  c.api_key = "your-api-key"
 end
 
 client = Efacturapty.client
@@ -117,9 +114,8 @@ client = Efacturapty.client
 
 ```ruby
 client = Efacturapty::Client.new(
-  client_id:     "id",
-  client_secret: "secret",
-  environment:   :production
+  api_key:     "your-api-key",
+  environment: :production
 )
 ```
 
@@ -127,12 +123,9 @@ client = Efacturapty::Client.new(
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `client_id` | — | **Required.** OAuth2 client ID |
-| `client_secret` | — | **Required.** OAuth2 client secret |
-| `scope` | `"apiApplication"` | OAuth2 scope |
+| `api_key` | — | **Required.** Bearer token issued by efacturapty |
 | `environment` | `:production` | `:production` or `:test` |
 | `api_base_url` | `https://api.efacturapty.com` | Override API base URL |
-| `auth_base_url` | `https://sec.efacturapty.com` | Override auth server URL |
 | `open_timeout` | `5` | TCP connect timeout (seconds) |
 | `read_timeout` | `30` | Read timeout (seconds) |
 | `logger` | `nil` | Any Logger-compatible object |
@@ -141,10 +134,9 @@ client = Efacturapty::Client.new(
 
 ## Authentication
 
-The gem uses **OAuth2 `client_credentials`** flow against
-`https://sec.efacturapty.com/connect/token`. Tokens are fetched automatically,
-cached in memory, and refreshed 60 seconds before expiry. No manual token
-management is required.
+Set `config.api_key` to the Bearer token issued by your efacturapty account.
+The token is sent as the `Authorization: Bearer …` header on every request.
+No token exchange or refresh logic is needed.
 
 ---
 
