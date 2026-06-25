@@ -26,6 +26,7 @@ lib/
       invoices.rb                 # 13 Invoices endpoints
       invoice_events.rb           # cancel (CreateCancellation)
       catalogs.rb                 # countries, currencies, locations, cpbs_families, cpbs_segments
+      subscriptions.rb            # list (paginated)
   generators/
     efacturapty/
       install_generator.rb        # rails g efacturapty:install
@@ -42,6 +43,7 @@ spec/
       invoices_spec.rb
       invoice_events_spec.rb
       catalogs_spec.rb
+      subscriptions_spec.rb
 
 docs/
   getting-started.md
@@ -49,6 +51,7 @@ docs/
   configuration.md
   errors.md
   catalogs.md
+  subscriptions.md                # subscription fields + list usage
 ```
 
 ## API facts (live OpenAPI spec at https://api.efacturapty.com/swagger/v1/swagger.json)
@@ -79,6 +82,7 @@ docs/
   | Catalogs | GET | `/api/v1/Catalogs/locations` |
   | Catalogs | GET | `/api/v1/Catalogs/CPBSfams` |
   | Catalogs | GET | `/api/v1/Catalogs/CPBSsegs` |
+  | Subscriptions | GET | `/api/v1/Subscriptions` |
 
 ## Error hierarchy
 
@@ -123,6 +127,11 @@ bundle exec rubocop                     # lint (TargetRubyVersion 2.6)
 gem build efacturapty.gemspec           # build .gem artifact
 bin/console                             # irb with gem loaded
 ```
+
+## Working rules
+
+- **When adding or changing a resource**, always update: the spec file for that resource, the architecture tree and endpoint table in this file, and the relevant doc in `docs/`.
+- **When adding a new resource**, also create `docs/<resource>.md` documenting the endpoint(s), parameters, and response fields.
 
 ## Testing approach
 

@@ -7,6 +7,7 @@ require_relative "resources/base_resource"
 require_relative "resources/invoices"
 require_relative "resources/invoice_events"
 require_relative "resources/catalogs"
+require_relative "resources/subscriptions"
 
 module Efacturapty
   # The main entry point for interacting with the efacturapty API.
@@ -48,6 +49,12 @@ module Efacturapty
     # @return [Resources::Catalogs]
     def catalogs
       @catalogs ||= Resources::Catalogs.new(connection)
+    end
+
+    # Access Subscriptions resource methods.
+    # @return [Resources::Subscriptions]
+    def subscriptions
+      @subscriptions ||= Resources::Subscriptions.new(connection)
     end
 
     private
