@@ -35,7 +35,7 @@ module Efacturapty
         req.params.merge!(params) unless params.empty?
         req.headers.merge!(auth_header)
         req.headers.merge!(headers) unless headers.empty?
-        req.body = body.to_json unless body.nil? || body.empty?
+        req.body = encode_body(body)
       end
       handle(response)
     end
@@ -69,6 +69,12 @@ module Efacturapty
 
     def auth_header
       { "Authorization" => "Bearer #{@token.access_token}" }
+    end
+
+    def encode_body(body)
+      return nil if body.nil? || body.empty?
+
+      body.is_a?(String) ? body : body.to_json
     end
 
     def handle(response)
