@@ -213,6 +213,106 @@ RSpec.describe Efacturapty::Resources::Invoices do
     end
   end
 
+  describe "#create_from_xml" do
+    it "POSTs raw XML to CreateInvoiceFromXml with application/xml content-type" do
+      xml = "<invoice><id>1</id></invoice>"
+      stub = stub_request(:post, "https://api.efacturapty.com/api/v1/Invoices/CreateInvoiceFromXml")
+             .with(body: xml, headers: { "Content-Type" => "application/xml" })
+             .to_return(
+               status: 200,
+               body: { "cufe" => "CUFE001", "autorizada" => true }.to_json,
+               headers: { "Content-Type" => "application/json" }
+             )
+
+      client.invoices.create_from_xml(xml)
+      expect(stub).to have_been_requested
+    end
+  end
+
+  describe "#authorization_admin" do
+    it "GETs /api/v1/Invoices/AuthorizationAdmin/{cufe} and returns the protocol" do
+      stub = stub_request(:get, "https://api.efacturapty.com/api/v1/Invoices/AuthorizationAdmin/CUFE001")
+             .to_return(
+               status: 200,
+               body: { "protocoloAutorizacion" => "PROT001" }.to_json,
+               headers: { "Content-Type" => "application/json" }
+             )
+
+      resp = client.invoices.authorization_admin("CUFE001")
+      expect(stub).to have_been_requested
+      expect(resp["protocoloAutorizacion"]).to eq("PROT001")
+    end
+  end
+
+  describe "#qr_image" do
+    it "GETs /api/v1/Invoices/GetQrImage/{cufe} and returns qr data" do
+      stub = stub_request(:get, "https://api.efacturapty.com/api/v1/Invoices/GetQrImage/CUFE001")
+             .to_return(
+               status: 200,
+               body: { "qrImage" => "base64data==" }.to_json,
+               headers: { "Content-Type" => "application/json" }
+             )
+
+      resp = client.invoices.qr_image("CUFE001")
+      expect(stub).to have_been_requested
+      expect(resp["qrImage"]).to eq("base64data==")
+    end
+  end
+
+  describe "#xml_from_dgi" do
+    it "GETs /api/v1/Invoices/GetXmlFromDGI/{cufe} and returns raw bytes" do
+      xml_bytes = "<?xml version=\"1.0\"?><root/>"
+      stub = stub_request(:get, "https://api.efacturapty.com/api/v1/Invoices/GetXmlFromDGI/CUFE001")
+             .to_return(status: 200, body: xml_bytes, headers: { "Content-Type" => "application/xml" })
+
+      result = client.invoices.xml_from_dgi("CUFE001")
+      expect(stub).to have_been_requested
+      expect(result).to eq(xml_bytes)
+    end
+  end
+
+  describe "#taxpayer_response" do
+    it "GETs /api/v1/Invoices/GetTaxpayerInvoiceResponse/{invoiceId}" do
+      stub = stub_request(:get, "https://api.efacturapty.com/api/v1/Invoices/GetTaxpayerInvoiceResponse/INV001")
+             .to_return(
+               status: 200,
+               body: { "status" => "accepted" }.to_json,
+               headers: { "Content-Type" => "application/json" }
+             )
+
+      resp = client.invoices.taxpayer_response("INV001")
+      expect(stub).to have_been_requested
+      expect(resp["status"]).to eq("accepted")
+    end
+  end
+
+  describe "#xml_file" do
+    it "GETs /api/v1/Invoices/{cufeId}/xml-file and returns raw bytes" do
+      xml_bytes = "<?xml version=\"1.0\"?><root/>"
+      stub = stub_request(:get, "https://api.efacturapty.com/api/v1/Invoices/CUFE001/xml-file")
+             .to_return(status: 200, body: xml_bytes, headers: { "Content-Type" => "application/xml" })
+
+      result = client.invoices.xml_file("CUFE001")
+      expect(stub).to have_been_requested
+      expect(result).to eq(xml_bytes)
+    end
+  end
+
+  describe "#html_cafe" do
+    it "GETs /api/v1/Invoices/{cufeId}/html-cafe and returns the html field" do
+      stub = stub_request(:get, "https://api.efacturapty.com/api/v1/Invoices/CUFE001/html-cafe")
+             .to_return(
+               status: 200,
+               body: { "html" => "<div>cafe</div>" }.to_json,
+               headers: { "Content-Type" => "application/json" }
+             )
+
+      resp = client.invoices.html_cafe("CUFE001")
+      expect(stub).to have_been_requested
+      expect(resp["html"]).to eq("<div>cafe</div>")
+    end
+  end
+
   describe "error handling" do
     it "raises NotFoundError on 404" do
       stub_request(:get, "https://api.efacturapty.com/api/v1/Invoices/id/MISSING")
