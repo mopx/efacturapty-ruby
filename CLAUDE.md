@@ -17,13 +17,14 @@ lib/
     errors.rb                     # full error hierarchy (see below)
     configuration.rb              # all knobs, defaults, validate!
     token.rb                      # OAuth2 client_credentials via Net::HTTP (thread-safe)
-    connection.rb                 # Faraday wrapper: JSON, auth header, retry, binary GETs
+    connection.rb                 # Faraday wrapper: JSON, auth header, retry, binary GETs,
+                                   # default Accept + Content-Type (application/json-patch+json)
     response.rb                   # thin Response wrapper (method_missing → hash keys)
     client.rb                     # Client: holds config+token, exposes resource accessors
     railtie.rb                    # Rails::Railtie (loads generators)
     resources/
       base_resource.rb            # get/post/get_raw helpers, compact(nil removal)
-      invoices.rb                 # 13 Invoices endpoints
+      invoices.rb                 # 12 Invoices endpoints
       invoice_events.rb           # cancel (CreateCancellation)
       catalogs.rb                 # countries, currencies, locations, cpbs_families, cpbs_segments
       subscriptions.rb            # list (paginated)
@@ -59,13 +60,21 @@ docs/
 
 ## API facts (live OpenAPI spec at https://api.efacturapty.com/swagger/v1/swagger.json)
 
+Official per-endpoint reference docs (Stoplight-generated PDFs, more authoritative than the raw
+OpenAPI spec for header/param behavior) live in `efacturapty-docs/` at the repo root — read them
+before changing request/response shapes for an endpoint they cover.
+
 - **Base URL:** `https://api.efacturapty.com`
+- **`Accept-Language` is required on every documented Invoices endpoint**; the API's own default
+  is `es-PA` (not bare `es`). All resource methods default their `locale:` kwarg to `"es-PA"`.
+- **POST bodies use `Content-Type: application/json-patch+json`**, not `application/json` — set
+  automatically by `Connection#post` for Hash/Array bodies.
 - **Auth:** Two modes supported:
   - Static API key (`config.api_key`): Bearer token sent directly, no OAuth2 call.
   - OAuth2 `client_credentials` (`config.client_id` + `client_secret`) →
     `https://sec.efacturapty.com/connect/token`. Scope: `apiApplication`.
     Token is cached + auto-refreshed (60s buffer before expiry).
-- **18 endpoints** in three groups:
+- **17 endpoints** in three groups:
 
   | Group | Method | Path |
   |-------|--------|------|
@@ -81,7 +90,6 @@ docs/
   | Invoices | GET | `/api/v1/Invoices/{cufeId}/cafe-file` |
   | Invoices | GET | `/api/v1/Invoices/{cufeId}/xml-file` |
   | Invoices | GET | `/api/v1/Invoices/{cufeId}/html-cafe` |
-  | Invoices | POST | `/api/v1/Invoices/{invoiceId}/mailto` |
   | InvoiceEvents | POST | `/api/v1/InvoiceEvents/CreateCancellation` |
   | Catalogs | GET | `/api/v1/Catalogs/countries` |
   | Catalogs | GET | `/api/v1/Catalogs/currencies` |
@@ -113,9 +121,14 @@ Efacturapty::Error
   for the ~50 nested DGI DTOs (gEmis, gItem, gTot, etc.).
 - **Binary endpoints** (`cafe_file`, `xml_file`, `xml_from_dgi`) return raw String bytes,
   not Response objects — use `get_raw` in Connection.
+- `xml_from_dgi` always sends `Accept: application/xml`; without it the API returns JSON
+  (`events` + `xmlRaw`) instead of the raw XML the method name promises.
 - **`compact`** in BaseResource strips nil query params before sending.
-- **`list` filters** are snake_case symbols; `PARAM_MAP` in invoices.rb camelizes them.
-  Include `locale:` key in the filters hash to set `Accept-Language`.
+- **`list` filters**: only `date_from`, `date_to`, `ruc`, `name`, `page`, `page_size`, `status`,
+  and `environment` (API-deprecated) are real query params — `PARAM_MAP` in invoices.rb
+  camelizes and whitelists them; anything else is silently dropped rather than sent as a
+  meaningless lowercase query param. Include `locale:` key in the filters hash to set
+  `Accept-Language` (default `"es-PA"`).
 - `Connection#post` only sends the request body when it's non-nil and non-empty.
 
 ## Compatibility

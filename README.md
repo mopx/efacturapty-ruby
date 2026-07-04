@@ -229,13 +229,6 @@ html = client.invoices.html_cafe(cufe_id)   # => Response (HTML body)
 resp = client.invoices.taxpayer_response(invoice_id)
 ```
 
-#### Send by email
-
-```ruby
-client.invoices.mail_to(invoice_id)                       # to taxpayer default
-client.invoices.mail_to(invoice_id, email: "x@y.com")    # override
-```
-
 ---
 
 ### Invoice Events (cancellation)

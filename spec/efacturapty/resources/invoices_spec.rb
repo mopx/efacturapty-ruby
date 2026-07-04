@@ -24,6 +24,19 @@ RSpec.describe Efacturapty::Resources::Invoices do
       expect(stub).to have_been_requested
     end
 
+    it "defaults Accept-Language to es-PA and sends application/json-patch+json" do
+      stub = stub_request(:post, "https://api.efacturapty.com/api/v1/Invoices")
+             .with(headers: { "Accept-Language" => "es-PA", "Content-Type" => "application/json-patch+json" })
+             .to_return(
+               status: 200,
+               body: { "cufe" => "CUFE001" }.to_json,
+               headers: { "Content-Type" => "application/json" }
+             )
+
+      client.invoices.create(invoice_payload)
+      expect(stub).to have_been_requested
+    end
+
     it "returns a Response with cufe and autorizada" do
       stub_request(:post, "https://api.efacturapty.com/api/v1/Invoices")
         .to_return(
@@ -51,11 +64,33 @@ RSpec.describe Efacturapty::Resources::Invoices do
       client.invoices.list(date_from: "2026-01-01", page_size: 10)
       expect(stub).to have_been_requested
     end
+
+    it "defaults Accept-Language to es-PA" do
+      stub = stub_request(:get, "https://api.efacturapty.com/api/v1/Invoices")
+             .with(headers: { "Accept-Language" => "es-PA" })
+             .to_return(status: 200, body: { "data" => [] }.to_json, headers: { "Content-Type" => "application/json" })
+
+      client.invoices.list
+      expect(stub).to have_been_requested
+    end
+
+    it "does not forward filter keys the API does not support" do
+      stub = stub_request(:get, "https://api.efacturapty.com/api/v1/Invoices")
+             .with do |req|
+               keys = URI.decode_www_form(req.uri.query || "").map(&:first)
+               !keys.include?("Cufe") && !keys.include?("DocumentNumber")
+             end
+             .to_return(status: 200, body: { "data" => [] }.to_json, headers: { "Content-Type" => "application/json" })
+
+      client.invoices.list(cufe: "should-be-ignored", document_number: "should-be-ignored")
+      expect(stub).to have_been_requested
+    end
   end
 
   describe "#find" do
-    it "GETs /api/v1/Invoices/id/{cufeId}" do
+    it "GETs /api/v1/Invoices/id/{cufeId} with Accept-Language" do
       stub = stub_request(:get, "https://api.efacturapty.com/api/v1/Invoices/id/CUFE001")
+             .with(headers: { "Accept-Language" => "es-PA" })
              .to_return(
                status: 200,
                body: { "id" => "CUFE001" }.to_json,
@@ -68,8 +103,9 @@ RSpec.describe Efacturapty::Resources::Invoices do
   end
 
   describe "#authorization" do
-    it "GETs /api/v1/Invoices/Authorization/{cufe} and returns the protocol" do
+    it "GETs /api/v1/Invoices/Authorization/{cufe} with Accept-Language and returns the protocol" do
       stub = stub_request(:get, "https://api.efacturapty.com/api/v1/Invoices/Authorization/CUFE001")
+             .with(headers: { "Accept-Language" => "es-PA" })
              .to_return(
                status: 200,
                body: { "protocoloAutorizacion" => "PROT001" }.to_json,
@@ -80,31 +116,27 @@ RSpec.describe Efacturapty::Resources::Invoices do
       expect(stub).to have_been_requested
       expect(resp["protocoloAutorizacion"]).to eq("PROT001")
     end
+
+    it "forwards a custom locale" do
+      stub = stub_request(:get, "https://api.efacturapty.com/api/v1/Invoices/Authorization/CUFE001")
+             .with(headers: { "Accept-Language" => "en" })
+             .to_return(status: 200, body: {}.to_json, headers: { "Content-Type" => "application/json" })
+
+      client.invoices.authorization("CUFE001", locale: "en")
+      expect(stub).to have_been_requested
+    end
   end
 
   describe "#cafe_file" do
-    it "GETs the cafe-file binary endpoint and returns raw bytes" do
+    it "GETs the cafe-file binary endpoint with Accept-Language and returns raw bytes" do
       pdf_bytes = "%PDF-fake"
       stub = stub_request(:get, "https://api.efacturapty.com/api/v1/Invoices/CUFE001/cafe-file")
+             .with(headers: { "Accept-Language" => "es-PA" })
              .to_return(status: 200, body: pdf_bytes, headers: { "Content-Type" => "application/pdf" })
 
       result = client.invoices.cafe_file("CUFE001")
       expect(stub).to have_been_requested
       expect(result).to eq(pdf_bytes)
-    end
-  end
-
-  describe "#mail_to" do
-    it "POSTs to /{invoiceId}/mailto" do
-      stub = stub_request(:post, "https://api.efacturapty.com/api/v1/Invoices/INV001/mailto")
-             .to_return(
-               status: 200,
-               body: {}.to_json,
-               headers: { "Content-Type" => "application/json" }
-             )
-
-      client.invoices.mail_to("INV001")
-      expect(stub).to have_been_requested
     end
   end
 
@@ -260,9 +292,10 @@ RSpec.describe Efacturapty::Resources::Invoices do
   end
 
   describe "#xml_from_dgi" do
-    it "GETs /api/v1/Invoices/GetXmlFromDGI/{cufe} and returns raw bytes" do
+    it "GETs /api/v1/Invoices/GetXmlFromDGI/{cufe} requesting XML and returns raw bytes" do
       xml_bytes = "<?xml version=\"1.0\"?><root/>"
       stub = stub_request(:get, "https://api.efacturapty.com/api/v1/Invoices/GetXmlFromDGI/CUFE001")
+             .with(headers: { "Accept" => "application/xml", "Accept-Language" => "es-PA" })
              .to_return(status: 200, body: xml_bytes, headers: { "Content-Type" => "application/xml" })
 
       result = client.invoices.xml_from_dgi("CUFE001")
@@ -310,6 +343,19 @@ RSpec.describe Efacturapty::Resources::Invoices do
       resp = client.invoices.html_cafe("CUFE001")
       expect(stub).to have_been_requested
       expect(resp["html"]).to eq("<div>cafe</div>")
+    end
+
+    it "forwards cafeFormat for thermal-printer output" do
+      stub = stub_request(:get, "https://api.efacturapty.com/api/v1/Invoices/CUFE001/html-cafe")
+             .with(query: { "cafeFormat" => "eighty_mm" })
+             .to_return(
+               status: 200,
+               body: { "html" => "<div/>" }.to_json,
+               headers: { "Content-Type" => "application/json" }
+             )
+
+      client.invoices.html_cafe("CUFE001", cafe_format: "eighty_mm")
+      expect(stub).to have_been_requested
     end
   end
 
