@@ -24,7 +24,10 @@ catalog.cpbs_families
 catalog.cpbs_segments
 ```
 
-Use catalog values to populate invoice fields such as:
-- `datosGenerales.datosEmisor.gUbiEm.distrito` — from locations
-- `listaItems[n].codigoCPBS` — from cpbs_families / cpbs_segments
-- `datosReceptor.gIdExt.pais` — from countries (for foreign customers)
+Use catalog values to populate invoice fields such as (see [`docs/invoices.md`](invoices.md) for
+the full `InvoiceRequest` schema these belong to):
+- `datosGenerales.informacionEmisor` location fields — from `locations`
+- `listaItems[n].codigoItemCodificacionPanamena` / `codigoItemCodificacionPanamenaAbreviada` —
+  from `cpbs_families` / `cpbs_segments`
+- `datosGenerales.facturaExportacion` (required when `destinoOperacion` is `2`) — from `countries`,
+  for foreign customers

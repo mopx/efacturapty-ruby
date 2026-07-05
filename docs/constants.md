@@ -26,6 +26,7 @@ Efacturapty::Constants::ITBMS_RATES["01"]
 | `"07"` | Nota de Débito genérica |
 | `"08"` | Factura de Zona Franca |
 | `"09"` | Reembolso |
+| `"10"` | Factura de operación extranjera |
 
 ## OPERATION_NATURES (B13 – naturalezaOperacion)
 
@@ -33,7 +34,10 @@ Efacturapty::Constants::ITBMS_RATES["01"]
 |------|-------------|
 | `"01"` | Venta |
 | `"02"` | Exportación |
-| `"10"` | Transferencia |
+| `"03"` | Re-exportación |
+| `"04"` | Venta de fuente extranjera |
+| `"05"` | Servicio de fuente extranjera |
+| `"10"` | Transferencia/Traspaso |
 | `"11"` | Devolución |
 | `"12"` | Consignación |
 | `"13"` | Remesa |

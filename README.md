@@ -67,7 +67,7 @@ client = Efacturapty.client
 countries = client.catalogs.countries
 
 # Create and authorize an invoice
-response = client.invoices.create(invoice_payload, qr: true)
+response = client.invoices.create(invoice_payload, include_qr: true)
 puts response.cufe        # CUFE assigned by DGI
 puts response.autorizada  # true when successfully authorized
 ```
@@ -157,16 +157,20 @@ resp = client.invoices.create(
     "listaItems" => [ { ... } ],
     "totales"    => { ... }
   },
-  qr:  true,   # include QR image (Base64) in response
-  xml: true    # include raw authorized XML in response
+  include_qr:  true,   # include QR image (Base64) in response
+  include_xml: true    # include raw authorized XML in response
 )
 
-resp.cufe               # => "CUFE-xxxx..."
-resp.autorizada         # => true
-resp.qr_content         # => "https://efacturapty.com/qr?cufe=..."
-resp.qr_content_image_base64  # => "iVBORw0KGgo..."
-resp.xml                # => "<?xml version=\"1.0\"...>"
+resp.cufe                     # => "CUFE-xxxx..."
+resp.autorizada                # => true
+resp.qrContent                 # => "https://efacturapty.com/qr?cufe=..."
+resp.qrContentImageBase64      # => "iVBORw0KGgo..."
+resp.xml                       # => "<?xml version=\"1.0\"...>"
 ```
+
+Response keys are looked up as-is (no camelCase→snake_case translation), so use the exact
+DGI field name — `resp.qrContentImageBase64`, not `resp.qr_content_image_base64` — or hash-style
+`resp["qrContentImageBase64"]`.
 
 #### Create from XML
 
@@ -186,9 +190,10 @@ page = client.invoices.list(
 )
 ```
 
-Available filter keys: `date_from`, `date_to`, `ruc`, `name`, `document_number`,
-`billing_point`, `branch_office_code`, `status`, `document_type_codes`, `cufe`,
-`environment`, `created_by`, `page`, `page_size`.
+Available filter keys: `date_from`, `date_to`, `ruc`, `name`, `status`, `page`, `page_size`, and
+`environment` (deprecated by the API, accepted but discouraged). Any other key is silently
+dropped rather than sent as a meaningless query param — see [`docs/invoices.md`](docs/invoices.md)
+for the full list of what earlier gem versions accepted but the real API never supported.
 
 Pass `locale: "en"` to override the `Accept-Language` header.
 
@@ -272,6 +277,9 @@ resp.status    # HTTP status code
 ```ruby
 begin
   client.invoices.create(payload)
+rescue Efacturapty::ValidationError => e
+  # client-side pre-flight check failed — no HTTP request was made
+  puts e.errors  # Array of every violation found
 rescue Efacturapty::AuthenticationError => e
   # 401 or bad credentials
   puts e.message
@@ -299,6 +307,7 @@ end
 ```
 Efacturapty::Error
 ├── ConfigurationError
+├── ValidationError        (client-side only — has .errors, no HTTP status/body)
 └── ApiError
     ├── AuthenticationError  (401)
     ├── BadRequestError      (400, 422)
