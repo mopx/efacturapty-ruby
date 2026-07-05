@@ -11,9 +11,6 @@ Efacturapty.configure do |config|
   # Scope granted to this client (only used with Option B, default "apiApplication").
   # config.scope = "apiApplication"
 
-  # Environment: :production (default) or :test.
-  # config.environment = :production
-
   # HTTP timeouts in seconds.
   # config.open_timeout = 5
   # config.read_timeout = 30

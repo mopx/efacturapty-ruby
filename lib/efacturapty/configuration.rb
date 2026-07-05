@@ -19,8 +19,7 @@ module Efacturapty
                   :auth_base_url,
                   :open_timeout,
                   :read_timeout,
-                  :logger,
-                  :environment
+                  :logger
 
     def initialize
       @api_base_url  = API_BASE_URL
@@ -29,7 +28,6 @@ module Efacturapty
       @open_timeout  = 5
       @read_timeout  = 30
       @logger        = nil
-      @environment   = :production
     end
 
     def validate!

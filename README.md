@@ -32,7 +32,6 @@ and all reference catalogs — compatible with **Ruby 2.6+ / Rails 5.2+** and mo
   - [Catalogs](#catalogs)
 - [Response objects](#response-objects)
 - [Error handling](#error-handling)
-- [Environments](#environments)
 - [Development](#development)
 
 ---
@@ -91,7 +90,6 @@ This creates `config/initializers/efacturapty.rb`:
 Efacturapty.configure do |config|
   config.api_key = ENV.fetch("EFACTURAPTY_API_KEY", nil)
 
-  # config.environment   = :production  # or :test
   # config.open_timeout  = 5
   # config.read_timeout  = 30
   # config.logger        = Rails.logger
@@ -114,8 +112,8 @@ client = Efacturapty.client
 
 ```ruby
 client = Efacturapty::Client.new(
-  api_key:     "your-api-key",
-  environment: :production
+  api_key: "your-api-key",
+  logger:  Logger.new($stdout)
 )
 ```
 
@@ -124,7 +122,6 @@ client = Efacturapty::Client.new(
 | Option | Default | Description |
 |--------|---------|-------------|
 | `api_key` | — | **Required.** Bearer token issued by efacturapty |
-| `environment` | `:production` | `:production` or `:test` |
 | `api_base_url` | `https://api.efacturapty.com` | Override API base URL |
 | `open_timeout` | `5` | TCP connect timeout (seconds) |
 | `read_timeout` | `30` | Read timeout (seconds) |
@@ -309,15 +306,6 @@ Efacturapty::Error
     ├── RateLimitError       (429)
     └── ServerError          (5xx)
 ```
-
----
-
-## Environments
-
-Set `config.environment = :test` to signal you are working in the sandbox.
-This value is passed as the `Environment` filter on invoice listing. The API
-base URL remains `https://api.efacturapty.com` — check with efacturapty support
-for sandbox credentials.
 
 ---
 

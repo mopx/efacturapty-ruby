@@ -38,7 +38,6 @@ Efacturapty.configure do |c|
 
   # Optional (shown with defaults)
   c.scope         = "apiApplication"     # OAuth2 scope (Option B only)
-  c.environment   = :production          # :production or :test
   c.api_base_url  = "https://api.efacturapty.com"
   c.auth_base_url = "https://sec.efacturapty.com"
   c.open_timeout  = 5                    # TCP connect timeout (seconds)
