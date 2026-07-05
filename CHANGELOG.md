@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+- **Breaking:** OAuth2 `client_credentials` authentication. `Token`, and
+  `Configuration#client_id`/`#client_secret`/`#scope`/`#auth_base_url`, have been removed.
+  `api_key` is now the only supported authentication mode — set it directly and it's sent as
+  the `Authorization: Bearer` header on every request, with no token exchange or refresh.
+
 ### Added
 - `Efacturapty::Constants` module with all DGI reference code tables from Ficha Técnica v1.10:
   `DOCUMENT_TYPES`, `OPERATION_NATURES`, `OPERATION_DIRECTIONS`, `DESTINATIONS`,

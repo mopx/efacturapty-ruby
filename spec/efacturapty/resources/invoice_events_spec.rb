@@ -2,15 +2,13 @@
 RSpec.describe Efacturapty::Resources::InvoiceEvents do
   let(:client) { default_client }
 
-  before { stub_token }
-
   describe "#cancel" do
     it "POSTs to CreateCancellation with cufe and reason" do
       url  = "https://api.efacturapty.com/api/v1/InvoiceEvents/CreateCancellation"
       stub = stub_request(:post, url)
              .with(
                body: { "cufe" => "abc123", "cancellationReason" => "Error en datos" }.to_json,
-               headers: { "Authorization" => "Bearer test-token" }
+               headers: { "Authorization" => "Bearer test-key" }
              )
              .to_return(
                status: 200,

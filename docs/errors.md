@@ -7,7 +7,7 @@ Efacturapty::Error (inherits StandardError)
 ├── ConfigurationError     — missing/invalid config at startup
 ├── ValidationError        — client-side pre-flight check failed (no HTTP call made)
 └── ApiError               — HTTP error from the API (has .status and .body)
-    ├── AuthenticationError  — HTTP 401, or bad OAuth2 credentials
+    ├── AuthenticationError  — HTTP 401 (bad or expired api_key)
     ├── BadRequestError      — HTTP 400 / 422
     ├── NotFoundError        — HTTP 404
     ├── RateLimitError       — HTTP 429
@@ -20,7 +20,7 @@ Efacturapty::Error (inherits StandardError)
 begin
   resp = client.invoices.create(payload)
 rescue Efacturapty::AuthenticationError => e
-  # OAuth2 token fetch failed, or API returned 401
+  # API returned 401 (bad or expired api_key)
   Rails.logger.error "efacturapty auth error: #{e.message}"
   raise
 rescue Efacturapty::BadRequestError => e
@@ -48,8 +48,7 @@ end
 
 ## ConfigurationError
 
-Raised synchronously during `Client.new` or `Efacturapty.client` if
-`client_id` or `client_secret` are blank.
+Raised synchronously during `Client.new` or `Efacturapty.client` if `api_key` is blank.
 
 ## ValidationError
 
@@ -71,7 +70,8 @@ end
 See [`docs/invoices.md`](invoices.md#client-side-validation) for what is and isn't checked, and
 [`docs/configuration.md`](configuration.md#validate_invoices) for how to disable it.
 
-## AuthenticationError (token failures)
+## AuthenticationError
 
-Raised by the `Token` class when the OAuth2 token endpoint returns a non-200
-response. The message includes the HTTP status code and response body.
+Raised only when the API itself returns HTTP 401 (a bad or expired `api_key`) — the gem sends
+`api_key` directly as the Bearer token on every request, so there is no separate token-exchange
+step that can fail.

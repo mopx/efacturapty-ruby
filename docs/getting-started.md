@@ -19,19 +19,14 @@ bundle install
 
 ## 2. Get credentials
 
-Log in to your [efacturapty](https://www.efacturapty.com) account. The gem supports two
-authentication modes — use whichever your account provides (see
-[`docs/configuration.md`](configuration.md) for details on both):
+Log in to your [efacturapty](https://www.efacturapty.com) account and get your API key
+(a long-lived Bearer token).
 
-- **Option A — static API key** (recommended if issued): a long-lived Bearer token.
-  ```sh
-  export EFACTURAPTY_API_KEY="your-api-key"
-  ```
-- **Option B — OAuth2 client credentials**: a Client ID and Client Secret.
-  ```sh
-  export EFACTURAPTY_CLIENT_ID="your-client-id"
-  export EFACTURAPTY_CLIENT_SECRET="your-client-secret"
-  ```
+Set it as an environment variable:
+
+```sh
+export EFACTURAPTY_API_KEY="your-api-key"
+```
 
 ## 3. Configure
 
@@ -43,24 +38,13 @@ rails generate efacturapty:install
 
 Then edit `config/initializers/efacturapty.rb`.
 
-**Plain Ruby (Option A — api_key):**
+**Plain Ruby:**
 
 ```ruby
 require "efacturapty"
 
 Efacturapty.configure do |c|
   c.api_key = ENV["EFACTURAPTY_API_KEY"]
-end
-```
-
-**Plain Ruby (Option B — OAuth2):**
-
-```ruby
-require "efacturapty"
-
-Efacturapty.configure do |c|
-  c.client_id     = ENV["EFACTURAPTY_CLIENT_ID"]
-  c.client_secret = ENV["EFACTURAPTY_CLIENT_SECRET"]
 end
 ```
 

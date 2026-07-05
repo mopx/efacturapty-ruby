@@ -4,12 +4,10 @@ RSpec.describe Efacturapty::Resources::Taxpayers do
     { "ruc" => "8-888-8888", "dv" => "5", "name" => "Acme Corp", "isRegisteredDgi" => true }.to_json
   end
 
-  before { stub_token }
-
   describe "#query_ruc" do
     it "GETs the correct path with taxpayer_type and ruc" do
       stub = stub_request(:get, "https://api.efacturapty.com/api/v1/Taxpayers/QueryRucDvPac/1/8-888-8888")
-             .with(headers: { "Authorization" => "Bearer test-token" })
+             .with(headers: { "Authorization" => "Bearer test-key" })
              .to_return(status: 200, body: taxpayer_response, headers: { "Content-Type" => "application/json" })
 
       client.taxpayers.query_ruc("8-888-8888", taxpayer_type: 1)

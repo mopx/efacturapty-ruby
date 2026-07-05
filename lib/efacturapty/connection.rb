@@ -19,9 +19,8 @@ module Efacturapty
 
     attr_reader :config
 
-    def initialize(config, token)
+    def initialize(config)
       @config = config
-      @token  = token
     end
 
     def connection
@@ -83,7 +82,7 @@ module Efacturapty
     end
 
     def auth_header
-      { "Authorization" => "Bearer #{@token.access_token}" }
+      { "Authorization" => "Bearer #{@config.api_key}" }
     end
 
     def json_body?(body)

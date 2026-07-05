@@ -2,21 +2,14 @@ module Efacturapty
   # Holds all configuration for an Efacturapty client.
   #
   #   Efacturapty.configure do |c|
-  #     c.client_id     = ENV["EFACTURAPTY_CLIENT_ID"]
-  #     c.client_secret = ENV["EFACTURAPTY_CLIENT_SECRET"]
+  #     c.api_key = ENV["EFACTURAPTY_API_KEY"]
   #   end
   #
   class Configuration
-    API_BASE_URL  = "https://api.efacturapty.com".freeze
-    AUTH_BASE_URL = "https://sec.efacturapty.com".freeze
-    DEFAULT_SCOPE = "apiApplication".freeze
+    API_BASE_URL = "https://api.efacturapty.com".freeze
 
-    attr_accessor :client_id,
-                  :client_secret,
-                  :api_key,
-                  :scope,
+    attr_accessor :api_key,
                   :api_base_url,
-                  :auth_base_url,
                   :open_timeout,
                   :read_timeout,
                   :logger,
@@ -24,8 +17,6 @@ module Efacturapty
 
     def initialize
       @api_base_url       = API_BASE_URL
-      @auth_base_url      = AUTH_BASE_URL
-      @scope              = DEFAULT_SCOPE
       @open_timeout       = 5
       @read_timeout       = 30
       @logger             = nil
@@ -33,10 +24,7 @@ module Efacturapty
     end
 
     def validate!
-      return unless blank?(api_key)
-
-      raise ConfigurationError, "client_id is required"     if blank?(client_id)
-      raise ConfigurationError, "client_secret is required" if blank?(client_secret)
+      raise ConfigurationError, "api_key is required" if blank?(api_key)
     end
 
     private

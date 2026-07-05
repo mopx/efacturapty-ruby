@@ -1,12 +1,10 @@
 RSpec.describe Efacturapty::Resources::Catalogs do
   let(:client) { default_client }
 
-  before { stub_token }
-
   shared_examples "a catalog endpoint" do |method, path|
     it "GETs #{path}" do
       stub = stub_request(:get, "https://api.efacturapty.com#{path}")
-             .with(headers: { "Authorization" => "Bearer test-token" })
+             .with(headers: { "Authorization" => "Bearer test-key" })
              .to_return(status: 200, body: [].to_json, headers: { "Content-Type" => "application/json" })
 
       client.catalogs.public_send(method)

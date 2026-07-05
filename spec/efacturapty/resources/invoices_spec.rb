@@ -5,14 +5,12 @@ RSpec.describe Efacturapty::Resources::Invoices do
     { "datosGenerales" => { "tipoDocumento" => "01" } }
   end
 
-  before { stub_token }
-
   describe "#create" do
     it "POSTs to /api/v1/Invoices with qr and xml query params" do
       stub = stub_request(:post, "https://api.efacturapty.com/api/v1/Invoices")
              .with(
                query: { "qr" => "true", "xml" => "true" },
-               headers: { "Authorization" => "Bearer test-token" }
+               headers: { "Authorization" => "Bearer test-key" }
              )
              .to_return(
                status: 200,

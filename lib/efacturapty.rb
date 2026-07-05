@@ -17,8 +17,7 @@ module Efacturapty
     # Configure the gem globally.
     #
     #   Efacturapty.configure do |config|
-    #     config.client_id     = ENV["EFACTURAPTY_CLIENT_ID"]
-    #     config.client_secret = ENV["EFACTURAPTY_CLIENT_SECRET"]
+    #     config.api_key = ENV["EFACTURAPTY_API_KEY"]
     #   end
     #
     def configure

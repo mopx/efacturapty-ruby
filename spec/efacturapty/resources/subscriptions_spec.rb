@@ -18,14 +18,12 @@ RSpec.describe Efacturapty::Resources::Subscriptions do
     }.to_json
   end
 
-  before { stub_token }
-
   describe "#list" do
     it "GETs /api/v1/Subscriptions with default locale" do
       stub = stub_request(:get, "https://api.efacturapty.com/api/v1/Subscriptions")
              .with(
                headers: {
-                 "Authorization" => "Bearer test-token",
+                 "Authorization" => "Bearer test-key",
                  "Accept-Language" => "es-PA"
                }
              )

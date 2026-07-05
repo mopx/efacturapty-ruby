@@ -59,8 +59,7 @@ module Efacturapty
     private_class_method :extract_message
   end
 
-  # Raised when the OAuth2 token request fails (bad credentials, network, etc.).
-  # Also returned by from_response for HTTP 401 replies from the API.
+  # 401 — bad or expired api_key.
   class AuthenticationError < ApiError; end
 
   # 400 / 422 — bad request or validation failure.

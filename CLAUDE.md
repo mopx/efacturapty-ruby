@@ -5,7 +5,7 @@ Ruby gem wrapping Panama's **efacturapty** service — the DGI e-invoicing (e-fa
 ## Purpose
 
 Makes it easy to integrate the efacturapty REST API into any Ruby 2.6+ or Rails 5.2+ app.
-Handles OAuth2 auth, PAC authorization, invoice CRUD, cancellation, file downloads, and catalogs.
+Handles auth, PAC authorization, invoice CRUD, cancellation, file downloads, and catalogs.
 
 ## Architecture
 
@@ -18,7 +18,6 @@ lib/
     configuration.rb              # all knobs, defaults, validate!
     constants.rb                  # DGI code tables (document types, operation natures, etc.)
     invoice_validator.rb          # pre-flight validation for Invoices#create payloads
-    token.rb                      # OAuth2 client_credentials via Net::HTTP (thread-safe)
     connection.rb                 # Faraday wrapper: JSON, auth header, retry, binary GETs,
                                    # default Accept + Content-Type (application/json-patch+json)
     response.rb                   # thin Response wrapper (method_missing → hash keys)
@@ -37,13 +36,12 @@ lib/
       templates/efacturapty.rb    # initializer template
 
 spec/
-  spec_helper.rb                  # WebMock setup, stub_token helper, default_client helper
+  spec_helper.rb                  # WebMock setup, default_client helper
   efacturapty_spec.rb             # module-level configure/client/reset!
   efacturapty/
     configuration_spec.rb
     errors_spec.rb
     invoice_validator_spec.rb
-    token_spec.rb
     resources/
       invoices_spec.rb
       invoice_events_spec.rb
@@ -72,11 +70,8 @@ before changing request/response shapes for an endpoint they cover.
   is `es-PA` (not bare `es`). All resource methods default their `locale:` kwarg to `"es-PA"`.
 - **POST bodies use `Content-Type: application/json-patch+json`**, not `application/json` — set
   automatically by `Connection#post` for Hash/Array bodies.
-- **Auth:** Two modes supported:
-  - Static API key (`config.api_key`): Bearer token sent directly, no OAuth2 call.
-  - OAuth2 `client_credentials` (`config.client_id` + `client_secret`) →
-    `https://sec.efacturapty.com/connect/token`. Scope: `apiApplication`.
-    Token is cached + auto-refreshed (60s buffer before expiry).
+- **Auth:** static API key only (`config.api_key`) — sent as `Authorization: Bearer` directly
+  on every request. No token exchange/refresh; OAuth2 `client_credentials` support was removed.
 - **17 endpoints** in three groups:
 
   | Group | Method | Path |
@@ -169,7 +164,6 @@ bin/console                             # irb with gem loaded
 ## Testing approach
 
 All HTTP calls are stubbed with WebMock — no live network calls.
-`stub_token` (in spec_helper) stubs the OAuth2 token endpoint.
-`default_client` creates `Client.new(client_id: "test-id", client_secret: "test-secret")`.
+`default_client` (in spec_helper) creates `Client.new(api_key: "test-key")`.
 
 Call `Efacturapty.reset!` in `after` blocks to clear global state between tests.

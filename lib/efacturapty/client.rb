@@ -1,6 +1,5 @@
 require_relative "configuration"
 require_relative "errors"
-require_relative "token"
 require_relative "connection"
 require_relative "response"
 require_relative "invoice_validator"
@@ -16,14 +15,11 @@ module Efacturapty
   #
   # Instantiate with explicit credentials:
   #
-  #   client = Efacturapty::Client.new(
-  #     client_id:     "your-client-id",
-  #     client_secret: "your-client-secret"
-  #   )
+  #   client = Efacturapty::Client.new(api_key: "your-api-key")
   #
   # Or use the global configuration:
   #
-  #   Efacturapty.configure { |c| c.client_id = "..." }
+  #   Efacturapty.configure { |c| c.api_key = "..." }
   #   client = Efacturapty.client
   #
   class Client
@@ -67,12 +63,8 @@ module Efacturapty
 
     private
 
-    def token
-      @token ||= Token.new(@config)
-    end
-
     def connection
-      @connection ||= Connection.new(@config, token)
+      @connection ||= Connection.new(@config)
     end
 
     def build_config(options)
