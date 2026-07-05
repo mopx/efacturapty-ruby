@@ -19,15 +19,17 @@ module Efacturapty
                   :auth_base_url,
                   :open_timeout,
                   :read_timeout,
-                  :logger
+                  :logger,
+                  :validate_invoices
 
     def initialize
-      @api_base_url  = API_BASE_URL
-      @auth_base_url = AUTH_BASE_URL
-      @scope         = DEFAULT_SCOPE
-      @open_timeout  = 5
-      @read_timeout  = 30
-      @logger        = nil
+      @api_base_url       = API_BASE_URL
+      @auth_base_url      = AUTH_BASE_URL
+      @scope              = DEFAULT_SCOPE
+      @open_timeout       = 5
+      @read_timeout       = 30
+      @logger             = nil
+      @validate_invoices  = true
     end
 
     def validate!

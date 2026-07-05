@@ -1,3 +1,5 @@
+require_relative "../invoice_validator"
+
 module Efacturapty
   module Resources
     # Wraps the /api/v1/Invoices endpoints.
@@ -17,8 +19,14 @@ module Efacturapty
       # @param include_qr [Boolean] include QR image in response.
       # @param include_xml [Boolean] include raw XML in response.
       # @param locale [String] Accept-Language header (default "es-PA").
+      # @param validate [Boolean, nil] run {InvoiceValidator} before sending the request.
+      #   Defaults to `nil`, which defers to `config.validate_invoices` (true unless disabled).
+      #   Pass `false` to skip client-side validation for this call.
+      # @raise [ValidationError] if validation runs and the payload fails it — no HTTP
+      #   request is made in that case.
       # @return [Response]
-      def create(invoice_hash, include_qr: false, include_xml: false, locale: DEFAULT_LOCALE)
+      def create(invoice_hash, include_qr: false, include_xml: false, locale: DEFAULT_LOCALE, validate: nil)
+        InvoiceValidator.validate!(invoice_hash) if run_validation?(validate)
         params = {}
         params["qr"]  = true if include_qr
         params["xml"] = true if include_xml
@@ -211,6 +219,11 @@ module Efacturapty
       }.freeze
 
       private
+
+      # `validate:` explicitly passed wins; otherwise defer to config.validate_invoices.
+      def run_validation?(validate)
+        validate.nil? ? @conn.config.validate_invoices : validate
+      end
 
       def accept_language(locale)
         { "Accept-Language" => locale }

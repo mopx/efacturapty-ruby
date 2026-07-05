@@ -18,14 +18,18 @@ module Efacturapty
       "06" => "Nota de Crédito genérica",
       "07" => "Nota de Débito genérica",
       "08" => "Factura de Zona Franca",
-      "09" => "Reembolso"
+      "09" => "Reembolso",
+      "10" => "Factura de operación extranjera"
     }.freeze
 
     # B13 – iTipoOp / naturalezaOperacion
     OPERATION_NATURES = {
       "01" => "Venta",
       "02" => "Exportación",
-      "10" => "Transferencia",
+      "03" => "Re-exportación",
+      "04" => "Venta de fuente extranjera",
+      "05" => "Servicio de fuente extranjera",
+      "10" => "Transferencia/Traspaso",
       "11" => "Devolución",
       "12" => "Consignación",
       "13" => "Remesa",

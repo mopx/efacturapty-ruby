@@ -5,6 +5,7 @@
 ```
 Efacturapty::Error (inherits StandardError)
 ├── ConfigurationError     — missing/invalid config at startup
+├── ValidationError        — client-side pre-flight check failed (no HTTP call made)
 └── ApiError               — HTTP error from the API (has .status and .body)
     ├── AuthenticationError  — HTTP 401, or bad OAuth2 credentials
     ├── BadRequestError      — HTTP 400 / 422
@@ -49,6 +50,26 @@ end
 
 Raised synchronously during `Client.new` or `Efacturapty.client` if
 `client_id` or `client_secret` are blank.
+
+## ValidationError
+
+Raised by `Efacturapty::InvoiceValidator` (used internally by `Invoices#create` and the
+credit/debit note helpers) when an invoice payload fails client-side pre-flight checks. Unlike
+`ApiError` and its subclasses, this is **not** an HTTP error — it has no `.status` or `.body`,
+because the request is never sent. It carries `.errors`, an Array of every violation found (the
+validator collects all problems rather than stopping at the first):
+
+```ruby
+begin
+  client.invoices.create(payload)
+rescue Efacturapty::ValidationError => e
+  e.errors   # => ["listaItems is required and must be a non-empty array", ...]
+  e.message  # => "Invoice payload is invalid: listaItems is required and must be a non-empty array; ..."
+end
+```
+
+See [`docs/invoices.md`](invoices.md#client-side-validation) for what is and isn't checked, and
+[`docs/configuration.md`](configuration.md#validate_invoices) for how to disable it.
 
 ## AuthenticationError (token failures)
 

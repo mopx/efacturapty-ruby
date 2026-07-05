@@ -10,13 +10,58 @@ and constraint below comes directly from that reference.
 client.invoices.create(payload, include_qr: false, include_xml: false, locale: "es-PA")
 ```
 
-- `payload` is a plain Ruby Hash forwarded as-is to `POST /api/v1/Invoices` — the gem performs
-  no validation, so any key you omit or misspell simply won't reach the API in the expected shape.
+- `payload` is a plain Ruby Hash forwarded as-is to `POST /api/v1/Invoices` — the gem does not
+  build or reshape the DGI structure for you, so any key you omit or misspell simply won't reach
+  the API in the expected shape. See "Client-side validation" below for the pre-flight checks
+  that do run before the request is sent.
 - `include_qr` → sends `?qr=true`, includes `qrContentImageBase64` in the response.
 - `include_xml` → sends `?xml=true`, includes the authorized `xml` in the response.
 - `locale` sets `Accept-Language` (**required** by the API; official default is `es-PA`, not `es`).
 - The gem sends `Content-Type: application/json-patch+json`, matching the API's documented
   content type for this endpoint.
+
+### Client-side validation
+
+Emitting an invoice is a slow, side-effecting call to a PAC — a bad request wastes a round-trip
+and comes back as an opaque HTTP 400/422. `create` (and the credit/debit note helpers, which all
+delegate to it) run `Efacturapty::InvoiceValidator` against the payload **before** making any HTTP
+request, and raise `Efacturapty::ValidationError` if it fails.
+
+The validator is deliberately **permissive, not authoritative** — it only rejects what the
+official docs make unambiguous and that the API cannot default on your behalf: presence of
+`datosGenerales`, `informacionReceptor`, a non-empty `listaItems`, `totales`; closed enums
+(`tipoEmision`, `tipoDocumento`, `naturalezaOperacion`, `tipoOperacion`, `destinoOperacion`,
+`tipoTransaccionVenta`, `tipoSucursal`, ITBMS rates, `tiempoPago`); `puntoFacturacion` matching
+`^\d{3}$` and not `"000"`; item bounds (`numeroSecuenciaItem` 1–9999, `descripcionProductoServicio`
+2–500 chars); and documented conditionals (`facturaExportacion` required when `destinoOperacion`
+is 2; `documentosFiscalesReferenciados` required for `tipoDocumento` 04/05;
+`grupoInformacionPago` required when `tiempoPago` is 2 or 3). Fields the API can default
+(`numeroDocumento`, `fechaEmision`, `puntoFacturacion`'s own default, computed totals, etc.) are
+never required here even where the reference docs show a "required" badge. Everything else
+(cross-field math, ITBMS calculation, business rules) is left entirely to the API to enforce.
+
+```ruby
+begin
+  client.invoices.create(payload)
+rescue Efacturapty::ValidationError => e
+  e.errors   # => ["listaItems is required and must be a non-empty array", ...]
+  e.message  # => "Invoice payload is invalid: listaItems is required and must be a non-empty array; ..."
+end
+```
+
+To bypass validation for a single call, pass `validate: false`:
+
+```ruby
+client.invoices.create(payload, validate: false)
+```
+
+To disable it globally:
+
+```ruby
+Efacturapty.configure { |c| c.validate_invoices = false }
+```
+
+`config.validate_invoices` defaults to `true`. See [`docs/configuration.md`](configuration.md).
 
 ### Top-level InvoiceRequest keys
 
@@ -36,7 +81,7 @@ client.invoices.create(payload, include_qr: false, include_xml: false, locale: "
 | `puntoFacturacion` | string | Yes | Exactly 3 digits, `^\d{3}$`, `000` not allowed. Default `001`. |
 | `fechaEmision` | string (`date-time`) | Yes | **Exactly 25 characters**, e.g. `2022-05-17T14:23:00-05:00` (full ISO-8601 with UTC offset — not a bare `YYYY-MM-DD`). Defaults to the current date if omitted. |
 | `fechaSalidaEstimada` | string (`date-time`) | No | Same 25-character format. Inform when known. |
-| `naturalezaOperacion` | string | Yes | `01` Venta, `02` Re-exportación, `03` Re-exportación, `04` Venta de fuente extranjera, `05` Servicio de fuente extranjera, `10` Transferencia/Traspaso, `11` Devolución, `12` Consignación, `13` Remesa, `14` Entrega gratuita, `20` Compra, `21` Importación. Default `01`. |
+| `naturalezaOperacion` | string | Yes | `01` Venta, `02` Exportación, `03` Re-exportación, `04` Venta de fuente extranjera, `05` Servicio de fuente extranjera, `10` Transferencia/Traspaso, `11` Devolución, `12` Consignación, `13` Remesa, `14` Entrega gratuita, `20` Compra, `21` Importación. Default `01`. |
 | `tipoOperacion` | integer | Yes | `1` Salida o venta, `2` Entrada o compra (factura de compra para comercio informal). Default `1`. |
 | `destinoOperacion` | integer | Yes | `1` Panamá, `2` Extranjero. Default `1`. |
 | `tipoTransaccionVenta` | integer | No | Only when `tipoOperacion` is `1`: `1` Venta de Giro del negocio, `2` Venta Activo Fijo, `3` Venta de Bienes Raíces, `4` Prestación de Servicio. Default `1`. |

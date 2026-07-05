@@ -16,6 +16,8 @@ lib/
     version.rb                    # VERSION constant
     errors.rb                     # full error hierarchy (see below)
     configuration.rb              # all knobs, defaults, validate!
+    constants.rb                  # DGI code tables (document types, operation natures, etc.)
+    invoice_validator.rb          # pre-flight validation for Invoices#create payloads
     token.rb                      # OAuth2 client_credentials via Net::HTTP (thread-safe)
     connection.rb                 # Faraday wrapper: JSON, auth header, retry, binary GETs,
                                    # default Accept + Content-Type (application/json-patch+json)
@@ -40,6 +42,7 @@ spec/
   efacturapty/
     configuration_spec.rb
     errors_spec.rb
+    invoice_validator_spec.rb
     token_spec.rb
     resources/
       invoices_spec.rb
@@ -104,6 +107,7 @@ before changing request/response shapes for an endpoint they cover.
 ```
 Efacturapty::Error
 ├── ConfigurationError
+├── ValidationError  (has .errors — client-side only, no HTTP status/body)
 └── ApiError  (has .status, .body)
     ├── AuthenticationError  (401 + token failures)
     ├── BadRequestError      (400/422)
@@ -119,6 +123,15 @@ Efacturapty::Error
 - **Invoice payloads are pass-through hashes.** No typed request builders exist yet.
   The gem forwards the hash directly as JSON. Future work: typed builder objects
   for the ~50 nested DGI DTOs (gEmis, gItem, gTot, etc.).
+- **Pre-flight validation, kept deliberately thin.** `Invoices#create` (and the credit/debit
+  note helpers built on it) run `InvoiceValidator` before the HTTP call and raise
+  `ValidationError` on failure — pass `validate: false` per call or set
+  `config.validate_invoices = false` globally to skip it (default `true`). The validator is
+  permissive by design: it only checks presence/enums/formats the docs make unambiguous and
+  that the API can't default (see `docs/invoices.md#client-side-validation`); it deliberately
+  does NOT attempt deep full-schema validation of every nested DTO, since that would drift from
+  the live API and risk rejecting valid payloads — leave cross-field math and business rules to
+  the API itself.
 - **Binary endpoints** (`cafe_file`, `xml_file`, `xml_from_dgi`) return raw String bytes,
   not Response objects — use `get_raw` in Connection.
 - `xml_from_dgi` always sends `Accept: application/xml`; without it the API returns JSON

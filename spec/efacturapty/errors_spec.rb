@@ -1,4 +1,4 @@
-# rubocop:disable RSpec/SpecFilePathFormat, RSpec/MultipleExpectations
+# rubocop:disable RSpec/MultipleExpectations, RSpec/MultipleDescribes
 RSpec.describe Efacturapty::ApiError do
   def fake_response(status, body)
     Struct.new(:status, :body).new(status, body)
@@ -43,4 +43,17 @@ RSpec.describe Efacturapty::ApiError do
     end
   end
 end
-# rubocop:enable RSpec/SpecFilePathFormat, RSpec/MultipleExpectations
+
+RSpec.describe Efacturapty::ValidationError do
+  it "is a plain Error, not an ApiError (no HTTP status/body involved)" do
+    expect(described_class.ancestors).to include(Efacturapty::Error)
+    expect(described_class.ancestors).not_to include(Efacturapty::ApiError)
+  end
+
+  it "exposes the collected errors and joins them into the message" do
+    err = described_class.new(["listaItems is required", "totales is required"])
+    expect(err.errors).to eq(["listaItems is required", "totales is required"])
+    expect(err.message).to eq("Invoice payload is invalid: listaItems is required; totales is required")
+  end
+end
+# rubocop:enable RSpec/MultipleExpectations, RSpec/MultipleDescribes

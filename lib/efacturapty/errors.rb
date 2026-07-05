@@ -5,6 +5,18 @@ module Efacturapty
   # Raised when the client is created with missing or invalid configuration.
   class ConfigurationError < Error; end
 
+  # Raised by {InvoiceValidator} when a payload fails client-side pre-flight
+  # checks, before any HTTP request is made. Not an {ApiError} subclass —
+  # there is no HTTP status/body, since the API was never contacted.
+  class ValidationError < Error
+    attr_reader :errors
+
+    def initialize(errors)
+      @errors = Array(errors)
+      super("Invoice payload is invalid: #{@errors.join('; ')}")
+    end
+  end
+
   # Base class for errors returned from the efacturapty HTTP API.
   # Carries the HTTP status code and the parsed response body.
   class ApiError < Error

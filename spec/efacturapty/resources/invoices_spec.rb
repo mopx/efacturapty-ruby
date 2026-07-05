@@ -20,7 +20,7 @@ RSpec.describe Efacturapty::Resources::Invoices do
                headers: { "Content-Type" => "application/json" }
              )
 
-      client.invoices.create(invoice_payload, include_qr: true, include_xml: true)
+      client.invoices.create(invoice_payload, include_qr: true, include_xml: true, validate: false)
       expect(stub).to have_been_requested
     end
 
@@ -33,7 +33,7 @@ RSpec.describe Efacturapty::Resources::Invoices do
                headers: { "Content-Type" => "application/json" }
              )
 
-      client.invoices.create(invoice_payload)
+      client.invoices.create(invoice_payload, validate: false)
       expect(stub).to have_been_requested
     end
 
@@ -45,9 +45,48 @@ RSpec.describe Efacturapty::Resources::Invoices do
           headers: { "Content-Type" => "application/json" }
         )
 
-      resp = client.invoices.create(invoice_payload)
+      resp = client.invoices.create(invoice_payload, validate: false)
       expect(resp.cufe).to eq("CUFE001")
       expect(resp.autorizada).to be(true)
+    end
+  end
+
+  describe "pre-flight validation" do
+    it "raises ValidationError and never contacts the API for an invalid payload" do
+      stub = stub_request(:post, "https://api.efacturapty.com/api/v1/Invoices")
+
+      expect { client.invoices.create(invoice_payload) }.to raise_error(Efacturapty::ValidationError) do |error|
+        expect(error.errors).not_to be_empty
+      end
+      expect(stub).not_to have_been_requested
+    end
+
+    it "does not raise for a fully valid payload" do
+      stub_request(:post, "https://api.efacturapty.com/api/v1/Invoices")
+        .to_return(
+          status: 200,
+          body: { "cufe" => "CUFE001" }.to_json,
+          headers: { "Content-Type" => "application/json" }
+        )
+
+      expect { client.invoices.create(valid_invoice_payload) }.not_to raise_error
+    end
+
+    it "skips validation when validate: false is passed" do
+      stub = stub_request(:post, "https://api.efacturapty.com/api/v1/Invoices")
+             .to_return(status: 200, body: {}.to_json, headers: { "Content-Type" => "application/json" })
+
+      expect { client.invoices.create(invoice_payload, validate: false) }.not_to raise_error
+      expect(stub).to have_been_requested
+    end
+
+    it "skips validation when config.validate_invoices is false" do
+      client.config.validate_invoices = false
+      stub = stub_request(:post, "https://api.efacturapty.com/api/v1/Invoices")
+             .to_return(status: 200, body: {}.to_json, headers: { "Content-Type" => "application/json" })
+
+      expect { client.invoices.create(invoice_payload) }.not_to raise_error
+      expect(stub).to have_been_requested
     end
   end
 
@@ -157,11 +196,8 @@ RSpec.describe Efacturapty::Resources::Invoices do
                headers: { "Content-Type" => "application/json" }
              )
 
-      client.invoices.create_credit_note(
-        invoice_payload,
-        referenced_cufe: "CUFE-ORIG",
-        referenced_date: "2026-06-01"
-      )
+      client.invoices.create_credit_note(invoice_payload, referenced_cufe: "CUFE-ORIG",
+                                                          referenced_date: "2026-06-01", validate: false)
       expect(stub).to have_been_requested
     end
 
@@ -178,7 +214,7 @@ RSpec.describe Efacturapty::Resources::Invoices do
              )
 
       payload = { "datosGenerales" => { "ruc" => "8-123-456", "dv" => "01" } }
-      client.invoices.create_credit_note(payload, referenced_cufe: "X", referenced_date: "2026-01-01")
+      client.invoices.create_credit_note(payload, referenced_cufe: "X", referenced_date: "2026-01-01", validate: false)
       expect(stub).to have_been_requested
     end
   end
@@ -199,7 +235,8 @@ RSpec.describe Efacturapty::Resources::Invoices do
       client.invoices.create_debit_note(
         invoice_payload,
         referenced_cufe: "CUFE-ORIG",
-        referenced_date: "2026-06-01"
+        referenced_date: "2026-06-01",
+        validate: false
       )
       expect(stub).to have_been_requested
     end
@@ -220,7 +257,7 @@ RSpec.describe Efacturapty::Resources::Invoices do
                headers: { "Content-Type" => "application/json" }
              )
 
-      client.invoices.create_generic_credit_note(invoice_payload)
+      client.invoices.create_generic_credit_note(invoice_payload, validate: false)
       expect(stub).to have_been_requested
     end
   end
@@ -240,7 +277,7 @@ RSpec.describe Efacturapty::Resources::Invoices do
                headers: { "Content-Type" => "application/json" }
              )
 
-      client.invoices.create_generic_debit_note(invoice_payload)
+      client.invoices.create_generic_debit_note(invoice_payload, validate: false)
       expect(stub).to have_been_requested
     end
   end
@@ -379,7 +416,7 @@ RSpec.describe Efacturapty::Resources::Invoices do
           headers: { "Content-Type" => "application/json" }
         )
 
-      expect { client.invoices.create(invoice_payload) }.to raise_error(Efacturapty::ServerError)
+      expect { client.invoices.create(invoice_payload, validate: false) }.to raise_error(Efacturapty::ServerError)
     end
   end
 end

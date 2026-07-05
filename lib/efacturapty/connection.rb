@@ -17,6 +17,8 @@ module Efacturapty
     # Content type the DGI API expects for JSON request bodies.
     JSON_PATCH_CONTENT_TYPE = "application/json-patch+json".freeze
 
+    attr_reader :config
+
     def initialize(config, token)
       @config = config
       @token  = token

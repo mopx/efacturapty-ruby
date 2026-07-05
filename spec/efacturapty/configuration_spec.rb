@@ -1,6 +1,17 @@
 RSpec.describe Efacturapty::Configuration do
   subject(:config) { described_class.new }
 
+  describe "#validate_invoices" do
+    it "defaults to true" do
+      expect(config.validate_invoices).to be(true)
+    end
+
+    it "can be disabled" do
+      config.validate_invoices = false
+      expect(config.validate_invoices).to be(false)
+    end
+  end
+
   describe "#validate!" do
     context "with OAuth2 credentials" do
       it "raises ConfigurationError when client_id is missing" do
