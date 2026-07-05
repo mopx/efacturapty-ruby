@@ -13,7 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `api_key` is now the only supported authentication mode — set it directly and it's sent as
   the `Authorization: Bearer` header on every request, with no token exchange or refresh.
 
+### Changed
+- **Breaking:** `InvoiceEvents#cancel`'s `reason:` keyword is now required (previously optional
+  with a `nil` default). The official API docs mark `cancellationReason` as required, so the
+  gem previously allowed constructing a request the API would always reject.
+
 ### Added
+- `InvoiceEvents#events(cufe, event_type:, locale:)` — `GET /api/v1/InvoiceEvents/GetAll/{cufe}`,
+  lists the events recorded against an invoice (cancellation, receiver manifestation, references,
+  authorization), with an optional `event_type` filter.
 - `Efacturapty::Constants` module with all DGI reference code tables from Ficha Técnica v1.10:
   `DOCUMENT_TYPES`, `OPERATION_NATURES`, `OPERATION_DIRECTIONS`, `DESTINATIONS`,
   `CAFE_FORMATS`, `CAFE_DELIVERY_METHODS`, `CONTAINER_DELIVERY`, `GENERATION_PROCESSES`,

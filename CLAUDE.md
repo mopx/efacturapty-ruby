@@ -26,7 +26,7 @@ lib/
     resources/
       base_resource.rb            # get/post/get_raw helpers, compact(nil removal)
       invoices.rb                 # 12 Invoices endpoints
-      invoice_events.rb           # cancel (CreateCancellation)
+      invoice_events.rb           # cancel (CreateCancellation), events (GetAll/{cufe})
       catalogs.rb                 # countries, currencies, locations, cpbs_families, cpbs_segments
       subscriptions.rb            # list (paginated)
       taxpayers.rb                # query_ruc (QueryRucDvPac)
@@ -72,7 +72,7 @@ before changing request/response shapes for an endpoint they cover.
   automatically by `Connection#post` for Hash/Array bodies.
 - **Auth:** static API key only (`config.api_key`) — sent as `Authorization: Bearer` directly
   on every request. No token exchange/refresh; OAuth2 `client_credentials` support was removed.
-- **17 endpoints** in three groups:
+- **21 endpoints** across five groups:
 
   | Group | Method | Path |
   |-------|--------|------|
@@ -89,6 +89,7 @@ before changing request/response shapes for an endpoint they cover.
   | Invoices | GET | `/api/v1/Invoices/{cufeId}/xml-file` |
   | Invoices | GET | `/api/v1/Invoices/{cufeId}/html-cafe` |
   | InvoiceEvents | POST | `/api/v1/InvoiceEvents/CreateCancellation` |
+  | InvoiceEvents | GET | `/api/v1/InvoiceEvents/GetAll/{cufe}` |
   | Catalogs | GET | `/api/v1/Catalogs/countries` |
   | Catalogs | GET | `/api/v1/Catalogs/currencies` |
   | Catalogs | GET | `/api/v1/Catalogs/locations` |
