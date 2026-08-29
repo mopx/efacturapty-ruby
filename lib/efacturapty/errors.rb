@@ -29,7 +29,7 @@ module Efacturapty
     end
 
     # Build the right subclass from a Faraday response.
-    # rubocop:disable-next Metrics/MethodLength
+    # rubocop:disable Metrics/MethodLength
     def self.from_response(response)
       status = response.status
       body   = response.body
@@ -47,6 +47,7 @@ module Efacturapty
 
       klass.new(msg, status: status, body: body)
     end
+    # rubocop:enable Metrics/MethodLength
 
     def self.extract_message(body, status)
       if body.is_a?(Hash)

@@ -6,7 +6,7 @@ module Efacturapty
     #
     # Payloads are passed as plain Ruby hashes and mapped directly to the DGI
     # InvoiceRequest JSON structure. See the API docs for the full schema.
-    # rubocop:disable-next Metrics/ClassLength
+    # rubocop:disable Metrics/ClassLength
     class Invoices < BaseResource
       BASE_PATH = "/api/v1/Invoices".freeze
 
@@ -267,5 +267,6 @@ module Efacturapty
         }
       end
     end
+    # rubocop:enable Metrics/ClassLength
   end
 end

@@ -1,4 +1,4 @@
-# rubocop:disable-next RSpec/MultipleExpectations
+# rubocop:disable RSpec/MultipleExpectations
 RSpec.describe Efacturapty::Resources::InvoiceEvents do
   let(:client) { default_client }
 
@@ -87,3 +87,4 @@ RSpec.describe Efacturapty::Resources::InvoiceEvents do
     end
   end
 end
+# rubocop:enable RSpec/MultipleExpectations
