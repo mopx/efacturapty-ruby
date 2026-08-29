@@ -1,4 +1,4 @@
-# rubocop:disable RSpec/MultipleExpectations
+# rubocop:disable-next RSpec/MultipleExpectations
 RSpec.describe Efacturapty::InvoiceValidator do
   let(:payload) { valid_invoice_payload }
 
@@ -203,4 +203,3 @@ RSpec.describe Efacturapty::InvoiceValidator do
     end
   end
 end
-# rubocop:enable RSpec/MultipleExpectations

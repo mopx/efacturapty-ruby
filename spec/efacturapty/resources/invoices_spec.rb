@@ -1,4 +1,4 @@
-# rubocop:disable RSpec/MultipleExpectations
+# rubocop:disable-next RSpec/MultipleExpectations
 RSpec.describe Efacturapty::Resources::Invoices do
   let(:client) { default_client }
   let(:invoice_payload) do
@@ -418,4 +418,3 @@ RSpec.describe Efacturapty::Resources::Invoices do
     end
   end
 end
-# rubocop:enable RSpec/MultipleExpectations

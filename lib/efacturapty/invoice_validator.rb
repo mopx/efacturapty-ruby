@@ -14,7 +14,7 @@ module Efacturapty
   # left entirely to the API to enforce.
   #
   # See docs/invoices.md for the field reference this validator is derived from.
-  # rubocop:disable Metrics/ClassLength
+  # rubocop:disable-next Metrics/ClassLength
   class InvoiceValidator
     TIPO_EMISION = %w[01 02 03 04].freeze
     TIPO_OPERACION = %w[1 2].freeze
@@ -236,5 +236,4 @@ module Efacturapty
       hash[key] || hash[key.to_sym]
     end
   end
-  # rubocop:enable Metrics/ClassLength
 end
