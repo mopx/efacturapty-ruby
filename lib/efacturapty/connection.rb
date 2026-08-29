@@ -67,9 +67,19 @@ module Efacturapty
         f.options.timeout      = cfg.read_timeout
         f.request :retry, RETRY_OPTIONS
         f.response :json, content_type: /\bjson\b/
-        f.response :logger, cfg.logger if cfg.logger
+        f.response :logger, cfg.logger, &method(:redact_api_key) if cfg.logger
         f.adapter Faraday.default_adapter
       end
+    end
+
+    # Faraday::Logging::Formatter#dump_headers renders each header as
+    # `"Key: value".inspect`-quoted, so an unfiltered request logs
+    # `Authorization: "Bearer <api_key>"` in full at :info by default. Every
+    # caller of this gem hands us a real, callable logger (Rails.logger and
+    # friends), so the key must never reach it unredacted -- this is the only
+    # place the request is built, and the only place that can prevent the leak.
+    def redact_api_key(logger)
+      logger.filter(/(Authorization: "Bearer )[^"]*(")/, '\1[REDACTED]\2')
     end
 
     def default_headers

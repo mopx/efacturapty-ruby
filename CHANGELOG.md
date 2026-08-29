@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Security:** `Connection` no longer logs the real `api_key` in plaintext. Faraday's
+  `:logger` middleware logged request headers verbatim by default, so any caller that set
+  `config.logger` (e.g. `Rails.logger`) had every request's `Authorization: Bearer <api_key>`
+  header written to its log at `:info`, in full. The logger filter now redacts the token to
+  `Authorization: "Bearer [REDACTED]"` while keeping the rest of the log line intact.
+
 ### Removed
 - **Breaking:** OAuth2 `client_credentials` authentication. `Token`, and
   `Configuration#client_id`/`#client_secret`/`#scope`/`#auth_base_url`, have been removed.
